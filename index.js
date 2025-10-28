@@ -509,7 +509,6 @@ setTimeout(() => {
 // =======================
 const express = require('express');
 const fetch = require('node-fetch');
-const chalk = require('chalk');
 
 const app = express();
 
