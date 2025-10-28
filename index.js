@@ -499,28 +499,22 @@ setTimeout(() => {
         }
     };
 
-        // Start the bot
+           // Start the bot
     init();
-}, 5000);
+}, 5000); // ✅ closes setTimeout correctly
 
 
 // =======================
 // 🌐 RENDER + KEEP ALIVE
 // =======================
 const express = require('express');
-const chalk = require('chalk'); // ✅ ADD THIS BACK
+const chalk = require('chalk'); // ✅ already imported above, safe to keep
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 require('dotenv').config();
 
-const { Client, GatewayIntentBits } = require('discord.js');
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildVoiceStates,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
-  ]
-});
+// ✅ Do NOT re-create Discord client here — it already exists above
+// So remove the duplicate "const { Client, GatewayIntentBits } = require('discord.js');"
+// and "const client = new Client(...)" — use the same `client`
 
 const app = express();
 
@@ -532,29 +526,14 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(chalk.green(`🌐 Uptime server running on port ${PORT}`)));
 
 // =======================
-// 🤖 BOT INITIALIZER
+// 🤖 KEEP-ALIVE PINGER
 // =======================
-async function startBot() {
-  try {
-    console.log(chalk.yellow('🚀 Starting Discord bot...'));
-    await client.login(process.env.TOKEN);
-    console.log(chalk.green('✅ Bot logged in successfully!'));
-
-    // Keep-alive ping for Render
-    setInterval(() => {
-      const url = `https://${process.env.RENDER_EXTERNAL_URL || 'localhost:' + PORT}`;
-      fetch(url)
+setInterval(() => {
+    const url = `https://${process.env.RENDER_EXTERNAL_URL || 'localhost:' + PORT}`;
+    fetch(url)
         .then(() => console.log('🔁 Keep-alive ping sent'))
         .catch(() => console.log('⚠️ Ping failed (local or network issue)'));
-    }, 5 * 60 * 1000);
-
-  } catch (err) {
-    console.error(chalk.red('❌ Failed to start bot:'), err);
-    process.exit(1);
-  }
-}
-
-setTimeout(startBot, 5000);
+}, 5 * 60 * 1000);
 
 // Export client
 module.exports = client;
