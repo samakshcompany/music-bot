@@ -508,7 +508,19 @@ setTimeout(() => {
 // 🌐 RENDER + KEEP ALIVE
 // =======================
 const express = require('express');
-const fetch = require('node-fetch');
+const chalk = require('chalk');
+
+// ✅ ADD THESE LINES 👇
+const { Client, GatewayIntentBits } = require('discord.js');
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ]
+});
+// ✅ DONE
 
 const app = express();
 
@@ -516,45 +528,3 @@ const app = express();
 app.get('/', (req, res) => {
     res.send('✅ Discord Music Bot is alive!');
 });
-
-// Start express server (Render provides PORT automatically)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(chalk.green(`🌐 Uptime server running on port ${PORT}`));
-});
-
-// =======================
-// 🤖 BOT INITIALIZER
-// =======================
-async function startBot() {
-    try {
-        console.log(chalk.yellow('🚀 Starting Discord bot...'));
-
-        // Load environment
-        require('dotenv').config();
-
-        // Login bot (using token from .env)
-        await client.login(process.env.TOKEN || config.discord.token);
-        console.log(chalk.green('✅ Bot logged in successfully!'));
-
-        // Optional: Ping Render self every 5 minutes to stay awake
-        setInterval(() => {
-            const url = `https://${process.env.RENDER_EXTERNAL_URL || 'localhost:' + PORT}`;
-            fetch(url)
-                .then(() => console.log('🔁 Keep-alive ping sent'))
-                .catch(() => console.log('⚠️ Ping failed (local or network issue)'));
-        }, 5 * 60 * 1000);
-
-    } catch (err) {
-        console.error(chalk.red('❌ Failed to start bot:'), err);
-        process.exit(1);
-    }
-}
-
-// Wait 5 seconds before starting to ensure stability
-setTimeout(() => {
-    startBot();
-}, 5000);
-
-// Export client for other modules
-module.exports = client;
