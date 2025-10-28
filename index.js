@@ -490,43 +490,72 @@ setTimeout(() => {
                 }
             }
 
-            // 24/7 Uptime + Render friendly Discord bot starter
+            // Login to Discord
+            await client.login(config.discord.token);
+
+        } catch (error) {
+            console.error(chalk.red('❌ Failed to start bot:'), error);
+            process.exit(1);
+        }
+    };
+
+        // Start the bot
+    init();
+}, 5000);
+
+
+// =======================
+// 🌐 RENDER + KEEP ALIVE
+// =======================
 const express = require('express');
+const fetch = require('node-fetch');
 const chalk = require('chalk');
+
 const app = express();
 
+// Basic uptime route (Render uses this to check if running)
 app.get('/', (req, res) => {
-    res.send('✅ Bot is Alive!');
+    res.send('✅ Discord Music Bot is alive!');
 });
 
-// Render automatically assigns PORT, fallback for local
+// Start express server (Render provides PORT automatically)
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(chalk.green(`🌐 Uptime server running on port ${PORT}`)));
+app.listen(PORT, () => {
+    console.log(chalk.green(`🌐 Uptime server running on port ${PORT}`));
+});
 
-// Keep bot alive and restart-safe
-async function init() {
+// =======================
+// 🤖 BOT INITIALIZER
+// =======================
+async function startBot() {
     try {
         console.log(chalk.yellow('🚀 Starting Discord bot...'));
 
-        // Login bot
+        // Load environment
         require('dotenv').config();
-await client.login(process.env.TOKEN);        console.log(chalk.green('✅ Bot logged in successfully!'));
 
-        // Optional: Ping self every 5 minutes (Render uptime)
+        // Login bot (using token from .env)
+        await client.login(process.env.TOKEN || config.discord.token);
+        console.log(chalk.green('✅ Bot logged in successfully!'));
+
+        // Optional: Ping Render self every 5 minutes to stay awake
         setInterval(() => {
-            fetch(`https://${process.env.RENDER_EXTERNAL_URL || 'localhost:' + PORT}`)
+            const url = `https://${process.env.RENDER_EXTERNAL_URL || 'localhost:' + PORT}`;
+            fetch(url)
                 .then(() => console.log('🔁 Keep-alive ping sent'))
-                .catch(() => console.log('⚠️ Ping failed (probably local run)'));
+                .catch(() => console.log('⚠️ Ping failed (local or network issue)'));
         }, 5 * 60 * 1000);
 
-    } catch (error) {
-        console.error(chalk.red('❌ Failed to start bot:'), error);
+    } catch (err) {
+        console.error(chalk.red('❌ Failed to start bot:'), err);
         process.exit(1);
     }
 }
 
-// Start the bot with delay to ensure stability
+// Wait 5 seconds before starting to ensure stability
 setTimeout(() => {
-    init();
-    module.exports = client;
+    startBot();
 }, 5000);
+
+// Export client for other modules
+module.exports = client;
