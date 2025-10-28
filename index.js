@@ -508,9 +508,8 @@ setTimeout(() => {
 // 🌐 RENDER + KEEP ALIVE
 // =======================
 const express = require('express');
-const chalk = require('chalk');
+const chalk = require('chalk'); // ✅ keep only this one
 
-// ✅ ADD THESE LINES 👇
 const { Client, GatewayIntentBits } = require('discord.js');
 const client = new Client({
     intents: [
@@ -520,11 +519,6 @@ const client = new Client({
         GatewayIntentBits.MessageContent
     ]
 });
-// ✅ DONE
 
 const app = express();
 
-// Basic uptime route (Render uses this to check if running)
-app.get('/', (req, res) => {
-    res.send('✅ Discord Music Bot is alive!');
-});
