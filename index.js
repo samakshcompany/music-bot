@@ -508,12 +508,9 @@ setTimeout(() => {
 // 🌐 RENDER + KEEP ALIVE
 // =======================
 const express = require('express');
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const fetch = (...args) =>
+  import('node-fetch').then(({ default: fetch }) => fetch(...args));
 require('dotenv').config();
-
-// ✅ Do NOT re-create Discord client here — it already exists above
-// So remove the duplicate "const { Client, GatewayIntentBits } = require('discord.js');"
-// and "const client = new Client(...)" — use the same `client`
 
 const app = express();
 
@@ -522,17 +519,19 @@ app.get('/', (req, res) => res.send('✅ Discord Music Bot is alive!'));
 
 // Start express server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(chalk.green(`🌐 Uptime server running on port ${PORT}`)));
+app.listen(PORT, () =>
+  console.log(chalk.green(`🌐 Uptime server running on port ${PORT}`))
+);
 
 // =======================
 // 🤖 KEEP-ALIVE PINGER
 // =======================
 setInterval(() => {
-    const url = `https://${process.env.RENDER_EXTERNAL_URL || 'localhost:' + PORT}`;
-    fetch(url)
-        .then(() => console.log('🔁 Keep-alive ping sent'))
-        .catch(() => console.log('⚠️ Ping failed (local or network issue)'));
+  const url = `https://${process.env.RENDER_EXTERNAL_URL || 'localhost:' + PORT}`;
+  fetch(url)
+    .then(() => console.log('🔁 Keep-alive ping sent'))
+    .catch(() => console.log('⚠️ Ping failed (local or network issue)'));
 }, 5 * 60 * 1000);
 
-// Export client
-module.exports = client;
+// ✅ Do NOT export client (it lives inside main bot logic above)
+// ✅ This is the final line of the file — nothing after this
