@@ -508,7 +508,7 @@ setTimeout(() => {
 // 🌐 RENDER + KEEP ALIVE
 // =======================
 const express = require('express');
-const chalk = require('chalk'); // ✅ only one import of chalk allowed
+const chalk = require('chalk'); // ✅ ADD THIS BACK
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 require('dotenv').config();
 
